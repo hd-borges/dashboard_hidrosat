@@ -22,7 +22,7 @@ def load_data(filepath):
         return pickle.load(f)
 
 # -------------------------------------------------------------------
-# Use relative paths based on the location of this Python file.
+# Use relative paths based on the location of this Python file.x
 # -------------------------------------------------------------------
 BASE_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(BASE_DIR, "all_water_masses.pkl")  
@@ -108,7 +108,7 @@ with col_left:
         )
     )
 
-    # Ensure y-axis always starts at 0 by setting the range from 0 to a bit above the max value.
+    # Ensure y-axis always starts at 0 by setting the range from 0 to a bit above the max valueaaaa.
     y_max = max(y_vals) if y_vals else 1
     fig.update_layout(
         xaxis_title="Data",
@@ -152,13 +152,13 @@ with col_right:
             gid_val = int(row_data["gid"])
             date_str = clicked_date.strftime("%Y%m%d")
             image_name = f"{date_str}_Turb.png"
-            map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turb", image_name)
+            map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", image_name)
             
             if os.path.exists(map_path):
                 st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
             else:
                 st.warning(f"Mapa não encontrado: {map_path}")
         else:
-            st.info("Mapas disponíveis apenas para Clorofila-a e Turbidez.")
+            st.info("Mapas disponíveis apenas para Clorofila-a e Turbidez")
     else:
         st.write("Clique em um ponto do gráfico para ver o mapa aqui.")
