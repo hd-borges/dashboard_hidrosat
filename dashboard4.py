@@ -79,8 +79,13 @@ with col_left:
         st.warning("Nenhum dado disponível para essa combinação.")
         st.stop()
 
-    # Convert raw data to µg/L
-    filtered_data["value"] = filtered_data[selected_param_col] / 100
+    # Convert raw data to µg/L for Clorofila-a and keep NTU for Turbidez
+    if selected_param_col == "chla_mean":
+        filtered_data["value"] = filtered_data[selected_param_col] / 100
+        y_axis_title = "µg/L"
+    else:
+        filtered_data["value"] = filtered_data[selected_param_col]
+        y_axis_title = "NTU"
 
     # Build Plotly scatter plot
     x_vals = filtered_data["date_key"].tolist()
@@ -101,7 +106,7 @@ with col_left:
             mode="markers",
             marker=dict(size=8, color=point_color, line=dict(width=1, color='black')),
             name=selected_param_label,
-            hovertemplate="<b>Data:</b> %{x}<br><b>Valor:</b> %{y:.2f} µg/L<extra></extra>"
+            hovertemplate=f"<b>Data:</b> %{{x}}<br><b>Valor:</b> %{{y:.2f}} {y_axis_title}<extra></extra>"
         )
     )
 
@@ -109,7 +114,7 @@ with col_left:
     y_max = max(y_vals) if y_vals else 1
     fig.update_layout(
         xaxis_title="Data",
-        yaxis_title="µg/L",
+        yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
         margin=dict(l=40, r=60, t=60, b=40),
@@ -117,7 +122,6 @@ with col_left:
         width=900,
         title=f"{selected_mass} – {selected_param_label}"
     )
-
     clicked_points = plotly_events(
         fig,
         click_event=True,
