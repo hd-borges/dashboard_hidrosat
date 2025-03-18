@@ -62,8 +62,6 @@ with col_left:
         format="YYYY-MM-DD"
     )
 
-    st.write(f"Data inicial: **{date_range[0].isoformat()}**  |  Data final: **{date_range[1].isoformat()}**")
-
     # Filter data based on selections
     mask = (
         (all_gdf["nmoriginal"] == selected_mass) &
@@ -84,7 +82,7 @@ with col_left:
         filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "µg/L"
     else:
-        filtered_data["value"] = filtered_data[selected_param_col]
+        filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "NTU"
 
     # Build Plotly scatter plot
