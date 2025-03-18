@@ -40,7 +40,7 @@ col_left, col_right = st.columns([1, 1], gap="large")
 with col_left:
     # 1) Select Water Mass
     mass_list = sorted(all_gdf["nmoriginal"].dropna().unique())
-    default_mass = "6684" if "6684" in mass_list else mass_list[0]
+    default_mass = "Açude Castanhão" if "Açude Castanhão" in mass_list else mass_list[0]
     selected_mass = st.selectbox("Selecione a massa d'água:", mass_list, index=mass_list.index(default_mass))
 
     # 2) Select Parameter (only mean values)
