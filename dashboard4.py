@@ -155,11 +155,11 @@ with col_right:
         elif selected_agg == "Mensal":
             month_str = clicked_date.strftime("%Y_%m")
             if selected_param_col == "chla_mean":
-                image_name = f"{month_str}_Média.png"
-                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Mensal", "Média", image_name)
+                folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Mensal", "Média")
             else:
-                image_name = f"{month_str}_Média.png"
-                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Mensal", "Média", image_name)
+                folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Mensal", "Média")
+            image_name = next((f for f in os.listdir(folder_path) if f.startswith(month_str)), None)
+            map_path = os.path.join(folder_path, image_name) if image_name else None
         elif selected_agg == "Trimestral":
             quarter = (clicked_date.month - 1) // 3 + 1
             quarter_str = f"{clicked_date.year}_{quarter}° Trimestre_Média"
@@ -170,7 +170,7 @@ with col_right:
                 image_name = f"{quarter_str}.png"
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Trimestral", "Mean", image_name)
 
-        if os.path.exists(map_path):
+        if map_path and os.path.exists(map_path):
             st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
