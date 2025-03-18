@@ -50,7 +50,11 @@ with col_left:
     selected_param_label = st.radio("Selecione o parâmetro:", list(param_options.keys()))
     selected_param_col = param_options[selected_param_label]
 
-    # 3) Date range slider with actual dates
+    # 3) Select Aggregation Level
+    agg_options = ["Diário", "Mensal", "Trimestral"]
+    selected_agg = st.radio("Selecione o nível de agregação:", agg_options)
+
+    # 4) Date range slider with actual dates
     min_date = all_gdf["date_key"].min().date()
     max_date = all_gdf["date_key"].max().date()
 
@@ -82,7 +86,7 @@ with col_left:
         filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "µg/L"
     else:
-        filtered_data["value"] = filtered_data[selected_param_col] / 100
+        filtered_data["value"] = filtered_data[selected_param_col]
         y_axis_title = "NTU"
 
     # Build Plotly scatter plot
@@ -108,7 +112,7 @@ with col_left:
         )
     )
 
-    # Ensure y-axis always starts at 0 by setting the range from 0 to a bit above the max valueaaaa.
+    # Ensure y-axis always starts at 0 by setting the range from 0 to a bit above the max value.
     y_max = max(y_vals) if y_vals else 1
     fig.update_layout(
         xaxis_title="Data",
@@ -138,27 +142,37 @@ with col_right:
 
         st.write(f"**Data selecionada**: {clicked_date.strftime('%Y-%m-%d')}")
 
-        if selected_param_col == "chla_mean":
-            gid_val = int(row_data["gid"])
-            date_str = clicked_date.strftime("%Y%m%d")
-            image_name = f"{date_str}_Chla.png"
-            map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", image_name)
-            
-            if os.path.exists(map_path):
-                st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
+        gid_val = int(row_data["gid"])
+        date_str = clicked_date.strftime("%Y%m%d")
+
+        if selected_agg == "Diário":
+            if selected_param_col == "chla_mean":
+                image_name = f"{date_str}_Chla.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", image_name)
             else:
-                st.warning(f"Mapa não encontrado: {map_path}")
-        elif selected_param_col == "turb_mean":
-            gid_val = int(row_data["gid"])
-            date_str = clicked_date.strftime("%Y%m%d")
-            image_name = f"{date_str}_Turb.png"
-            map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", image_name)
-            
-            if os.path.exists(map_path):
-                st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
+                image_name = f"{date_str}_Turb.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", image_name)
+        elif selected_agg == "Mensal":
+            month_str = clicked_date.strftime("%Y_%m")
+            if selected_param_col == "chla_mean":
+                image_name = f"{month_str}_Média.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Mensal", "Média", image_name)
             else:
-                st.warning(f"Mapa não encontrado: {map_path}")
+                image_name = f"{month_str}_Média.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Mensal", "Média", image_name)
+        elif selected_agg == "Trimestral":
+            quarter = (clicked_date.month - 1) // 3 + 1
+            quarter_str = f"{clicked_date.year}_{quarter}° Trimestre_Média"
+            if selected_param_col == "chla_mean":
+                image_name = f"{quarter_str}.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Trimestral", "Mean", image_name)
+            else:
+                image_name = f"{quarter_str}.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Trimestral", "Mean", image_name)
+
+        if os.path.exists(map_path):
+            st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
         else:
-            st.info("Mapas disponíveis apenas para Clorofila-a e Turbidez")
+            st.warning(f"Mapa não encontrado: {map_path}")
     else:
         st.write("Clique em um ponto do gráfico para ver o mapa aqui.")
