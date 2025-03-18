@@ -40,7 +40,8 @@ col_left, col_right = st.columns([1, 1], gap="large")
 with col_left:
     # 1) Select Water Mass
     mass_list = sorted(all_gdf["nmoriginal"].dropna().unique())
-    selected_mass = st.selectbox("Selecione a massa d'água:", mass_list)
+    default_mass = "6684" if "6684" in mass_list else mass_list[0]
+    selected_mass = st.selectbox("Selecione a massa d'água:", mass_list, index=mass_list.index(default_mass))
 
     # 2) Select Parameter (only mean values)
     param_options = {
@@ -52,7 +53,7 @@ with col_left:
 
     # 3) Select Aggregation Level
     agg_options = ["Diário", "Mensal", "Trimestral"]
-    selected_agg = st.radio("Selecione o nível de agregação:", agg_options)
+    selected_agg = st.radio("Selecione o nível de agregação do mapa:", agg_options)
 
     # 4) Date range slider with actual dates
     min_date = all_gdf["date_key"].min().date()
