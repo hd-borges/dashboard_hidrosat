@@ -148,7 +148,17 @@ with col_right:
                 st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
             else:
                 st.warning(f"Mapa não encontrado: {map_path}")
+        elif selected_param_col == "turb_mean":
+            gid_val = int(row_data["gid"])
+            date_str = clicked_date.strftime("%Y%m%d")
+            image_name = f"{date_str}_Turb.png"
+            map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turb", image_name)
+            
+            if os.path.exists(map_path):
+                st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
+            else:
+                st.warning(f"Mapa não encontrado: {map_path}")
         else:
-            st.info("Mapas disponíveis apenas para Clorofila-a.")
+            st.info("Mapas disponíveis apenas para Clorofila-a e Turbidez.")
     else:
         st.write("Clique em um ponto do gráfico para ver o mapa aqui.")
