@@ -35,7 +35,7 @@ all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
 # Create two columns (make left a bit wider so there's room for the chart)
-col_left, col_right = st.columns([1.2, 1], gap="small")
+col_left, col_right = st.columns([0.8, 1], gap="small")
 
 with col_left:
     # 1) Select Water Mass
