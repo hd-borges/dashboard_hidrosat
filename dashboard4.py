@@ -34,7 +34,7 @@ MAPS_FOLDER = os.path.join(BASE_DIR, "maps")
 all_gdf = load_data(DATA_PATH)
 all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 
-st.title("Visualização de qualidade de Água obtida por dados espaciais")
+# st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
 # Create two columns with more space for the left column
 col_left, col_right = st.columns([1, 1], gap="small")
