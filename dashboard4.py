@@ -78,12 +78,11 @@ with col_left:
         st.warning("Nenhum dado disponível para essa combinação.")
         st.stop()
 
-    # Convert raw data to µg/L for Clorofila-a and keep NTU for Turbidez
+    # Convert raw data to µg/L for Clorofila-a and NTU for Turbidez
+    filtered_data["value"] = filtered_data[selected_param_col] / 100  # Always divide by 100
     if selected_param_col == "chla_mean":
-        filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "µg/L"
     else:
-        filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "NTU"
 
     # Build Plotly scatter plot
