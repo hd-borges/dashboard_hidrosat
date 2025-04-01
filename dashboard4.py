@@ -115,10 +115,14 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=40, r=60, t=40, b=20),  # Reduced top and bottom margins
-        height=300,  # Reduced from 350
+        margin=dict(l=40, r=40, t=30, b=10),  # Further reduced margins
+        height=280,  # Further reduced height
         width=850,
-        title=f"{selected_mass} – {selected_param_label}"
+        title=dict(
+            text=f"{selected_mass} – {selected_param_label}",
+            y=0.95  # Move title closer to plot
+        ),
+        plot_bgcolor='white'
     )
 
     clicked_points = plotly_events(
@@ -126,15 +130,17 @@ with col_left:
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=400  # Reduced from 600
+        override_height=350  # Further reduced
     )
 
 with col_right:
-    # Add custom CSS to reduce spacing
+    # Enhanced CSS to reduce spacing
     st.markdown("""
         <style>
-        .block-container {gap: 1rem !important;}
-        .element-container {margin: 1px !important;}
+        .block-container {gap: 0.5rem !important;}
+        .element-container {margin-bottom: 0px !important;}
+        .stImage {margin: 0 !important; padding: 0 !important;}
+        div[data-testid="stImage"] {margin: 0 !important; padding: 0 !important;}
         </style>
     """, unsafe_allow_html=True)
     
@@ -207,14 +213,13 @@ with col_right:
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
 
         if map_path and os.path.exists(map_path):
-            # Adjust map size with columns
-            col1, col2, col3 = st.columns([1,1,1])
-            with col2:
-                st.image(
-                    map_path, 
-                    caption=f"GID: {gid_val}", 
-                    width=400,  # Set the desired width in pixels
-                )
+            st.markdown('<div style="margin-top: -20px;">', unsafe_allow_html=True)  # Negative margin to pull content up
+            st.image(
+                map_path,
+                caption=None,  # Remove caption to save space
+                width=450
+            )
+            st.markdown(f'<div style="text-align: center; margin-top: -10px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
