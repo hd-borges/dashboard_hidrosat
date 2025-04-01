@@ -126,13 +126,7 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=40, r=20, t=50, b=50),  # Reduced margins
-        title=dict(
-            text=f"{selected_mass} – {selected_param_label}",
-            x=0.5,
-            y=0.95,
-            xanchor='center'
-        ),
+        margin=dict(l=40, r=20, t=20, b=50),  # Reduced top margin since there's no title
         plot_bgcolor='white',
         showlegend=False,
         height=400,
