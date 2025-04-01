@@ -35,7 +35,7 @@ all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
 # Create two columns
-col_left, col_right = st.columns([0.7, 1], gap="small")
+col_left, col_right = st.columns([0.8, 1], gap="small")
 
 with col_left:
     # 1) Select Water Mass
@@ -208,12 +208,12 @@ with col_right:
 
         if map_path and os.path.exists(map_path):
             # Adjust map size with columns
-            col1, col2, col3 = st.columns([1,4,1])
+            col1, col2, col3 = st.columns([1,1,1])
             with col2:
                 st.image(
                     map_path, 
                     caption=f"GID: {gid_val}", 
-                    width=500,  # Set the desired width in pixels
+                    width=400,  # Set the desired width in pixels
                 )
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
