@@ -25,7 +25,7 @@ def load_data(filepath):
 # Use relative paths based on the location of this Python file.
 # -------------------------------------------------------------------
 BASE_DIR = os.path.dirname(__file__)
-DATA_PATH = os.path.join(BASE_DIR, "all_water_masses.pkl")  
+DATA_PATH = os.path.join(BASE_DIR, "all_water_masses.pkl")
 MAPS_FOLDER = os.path.join(BASE_DIR, "maps")
 
 # Load and prepare data
@@ -34,8 +34,8 @@ all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 
 st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
-# Create two columns
-col_left, col_right = st.columns([0.9, 1], gap="small")
+# Create two columns (make left a bit wider so there's room for the chart)
+col_left, col_right = st.columns([1.2, 1], gap="small")
 
 with col_left:
     # 1) Select Water Mass
@@ -78,7 +78,7 @@ with col_left:
         st.warning("Nenhum dado disponível para essa combinação.")
         st.stop()
 
-    # Convert raw data to µg/L for Clorofila-a and NTU for Turbidez
+    # Convert raw data to µg/L (Chl-a) or NTU (Turbidez)
     if selected_param_col == "turb_mean":
         filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
         y_axis_title = "NTU"
@@ -86,7 +86,7 @@ with col_left:
         filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
         y_axis_title = "µg/L"
 
-    # Build Plotly scatter plot
+    # Prepare data for Plotly
     x_vals = filtered_data["date_key"].tolist()
     y_vals = filtered_data["value"].astype(float).tolist()
 
@@ -96,6 +96,7 @@ with col_left:
     else:
         point_color = "brown"
 
+    # Build Plotly scatter plot
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -108,37 +109,39 @@ with col_left:
         )
     )
 
-    # Ensure y-axis always starts at 0
     y_max = max(y_vals) if y_vals else 1
     fig.update_layout(
+        # Make the layout responsive
+        autosize=True,
+        
         xaxis_title="Data",
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=50, r=120, t=80, b=40),  # Increased top and right margins
-        height=350,
-        autosize=True,
+        
+        # Increase top margin so mode bar doesn't overlap the title
+        margin=dict(l=50, r=50, t=120, b=50),
+        
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
-            y=0.98,
             x=0.5,
+            y=0.95,
             xanchor='center'
         ),
         plot_bgcolor='white',
         showlegend=False
     )
 
-    # Add a config to display the modebar (container options) and make the plot responsive
+    # No fixed height so the chart can fill column width
     clicked_points = plotly_events(
         fig,
         click_event=True,
         hover_event=False,
-        select_event=False,
-        override_height=550
+        select_event=False
     )
 
 with col_right:
-    # Enhanced CSS to reduce spacing but keep some padding at the top
+    # CSS to reduce spacing but add a bit of margin for the map
     st.markdown("""
         <style>
         .block-container {gap: 1rem !important;}
@@ -150,7 +153,7 @@ with col_right:
     
     st.subheader("Mapa Selecionado", divider='gray')
     
-    # Define options and create radio selector
+    # Define aggregation options
     agg_options = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
     selected_agg = st.radio(
         "Selecione o nível de agregação do mapa:",
@@ -164,13 +167,11 @@ with col_right:
         row_data = filtered_data.iloc[point_index]
         clicked_date = row_data["date_key"]
 
-        # Combine date display with the subheader
         st.markdown(f"**Data**: {clicked_date.strftime('%Y-%m-%d')}")
-
         gid_val = int(row_data["gid"])
         date_str = clicked_date.strftime("%Y%m%d")
 
-        # Build the appropriate file path based on the selected aggregation level
+        # Build the appropriate file path
         if selected_agg == "Diário":
             if selected_param_col == "chla_mean":
                 image_name = f"{date_str}_Chla_Diario.png"
@@ -217,15 +218,17 @@ with col_right:
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
 
         if map_path and os.path.exists(map_path):
-            st.markdown('<div style="margin: 15px 0;">', unsafe_allow_html=True)  # Added top margin
+            st.markdown('<div style="margin: 15px 0;">', unsafe_allow_html=True)
             st.image(
                 map_path,
                 caption=None,
                 use_container_width=True
             )
-            st.markdown(f'<div style="text-align: center; margin-top: 5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div style="text-align: center; margin-top: 5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>',
+                unsafe_allow_html=True
+            )
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
-        # Center the message
         st.markdown("<div style='text-align: center; margin-top: 20px;'>Clique em um ponto do gráfico para ver o mapa aqui.</div>", unsafe_allow_html=True)
