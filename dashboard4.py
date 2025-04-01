@@ -216,11 +216,11 @@ with col_right:
             st.image(
                 map_path,
                 caption=None,  # Remove caption to save space
-                width=500  # Increased width for a larger map
+                width=700  # Increased width for a larger map
             )
             st.markdown(f'<div style="text-align: center; margin-top: -5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
         # Center the message
-        st.markdown("<div style='text-align: center; margin-top: 20px;'>Clique em um ponto do gráfico para ver o mapa aqui.</div>", unsafe_allow_html=True)
+        st.markdown("<div style='stext-align: center; margin-top: 20px;'>Clique em um ponto do gráfico para ver o mapa aqui.</div>", unsafe_allow_html=True)
