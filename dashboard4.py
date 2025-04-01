@@ -126,7 +126,7 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=50, r=50, t=50, b=50),  # Adjusted margins
+        margin=dict(l=50, r=50, t=50, b=50),
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
             x=0.5,
@@ -135,21 +135,17 @@ with col_left:
         ),
         plot_bgcolor='white',
         showlegend=False,
-        height=400  # Set explicit height
+        height=400
     )
 
-    # Add extra padding in container
-    st.markdown('<div style="margin-bottom: 30px;">', unsafe_allow_html=True)
+    # Display graph with plotly_events (removed st.plotly_chart)
     clicked_points = plotly_events(
         fig,
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=450  # Increased container height
+        override_height=450
     )
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.plotly_chart(fig, use_container_width=True)
 
 with col_right:
     # CSS with proper string formatting
