@@ -116,8 +116,8 @@ with col_left:
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
         margin=dict(l=40, r=60, t=40, b=20),  # Reduced top and bottom margins
-        height=250,  # Reduced from 350
-        width=800,
+        height=300,  # Reduced from 350
+        width=850,
         title=f"{selected_mass} – {selected_param_label}"
     )
 
@@ -213,7 +213,7 @@ with col_right:
                 st.image(
                     map_path, 
                     caption=f"GID: {gid_val}", 
-                    width=600,  # Set the desired width in pixels
+                    width=500,  # Set the desired width in pixels
                 )
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
