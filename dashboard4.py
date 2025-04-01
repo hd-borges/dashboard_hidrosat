@@ -13,7 +13,7 @@ import pickle
 import plotly.graph_objects as go
 from streamlit_plotly_events import plotly_events
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="centered")
 
 @st.cache_data
 def load_data(filepath):
