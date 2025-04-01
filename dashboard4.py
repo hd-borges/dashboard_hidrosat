@@ -79,11 +79,15 @@ with col_left:
         st.stop()
 
     # Convert raw data to µg/L for Clorofila-a and NTU for Turbidez
-    filtered_data["value"] = filtered_data[selected_param_col] / 100  # Always divide by 100
     if selected_param_col == "chla_mean":
+        filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "µg/L"
-    else:
+    else:  # turb_mean
+        # Ensure turbidity values are being properly converted
+        filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
         y_axis_title = "NTU"
+        # Add debug information
+        st.write(f"Min Turb: {filtered_data['value'].min():.2f}, Max Turb: {filtered_data['value'].max():.2f}")
 
     # Build Plotly scatter plot
     x_vals = filtered_data["date_key"].tolist()
@@ -115,7 +119,7 @@ with col_left:
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
         margin=dict(l=40, r=40, t=30, b=10),  # Further reduced margins
-        height=280,  # Further reduced height
+        height=300,  # Further reduced height
         width=850,
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
