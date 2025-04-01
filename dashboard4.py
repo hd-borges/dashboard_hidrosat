@@ -116,8 +116,8 @@ with col_left:
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
         margin=dict(l=40, r=60, t=40, b=20),  # Reduced top and bottom margins
-        height=300,  # Reduced from 350
-        width=900,
+        height=250,  # Reduced from 350
+        width=700,
         title=f"{selected_mass} – {selected_param_label}"
     )
 
@@ -126,7 +126,7 @@ with col_left:
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=450  # Reduced from 600
+        override_height=400  # Reduced from 600
     )
 
 with col_right:
@@ -208,7 +208,7 @@ with col_right:
 
         if map_path and os.path.exists(map_path):
             # Adjust map size with columns
-            col1, col2, col3 = st.columns([1,8,1])
+            col1, col2, col3 = st.columns([1,6,1])
             with col2:
                 st.image(
                     map_path, 
