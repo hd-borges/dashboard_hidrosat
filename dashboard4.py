@@ -83,7 +83,7 @@ with col_left:
         filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "µg/L"
     else:
-        filtered_data["value"] = filtered_data[selected_param_col]
+        filtered_data["value"] = filtered_data[selected_param_col] / 100
         y_axis_title = "NTU"
 
     # Build Plotly scatter plot
