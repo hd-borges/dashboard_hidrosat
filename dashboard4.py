@@ -22,7 +22,7 @@ def load_data(filepath):
         return pickle.load(f)
 
 # -------------------------------------------------------------------
-# Use relative paths based on the location of this Python file.x
+# Use relative paths based on the location of this Python file.
 # -------------------------------------------------------------------
 BASE_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(BASE_DIR, "all_water_masses.pkl")  
@@ -94,8 +94,7 @@ with col_left:
     x_vals = filtered_data["date_key"].tolist()
     y_vals = filtered_data["value"].astype(float).tolist()
 
-    # Set marker color based on parameter:
-    # green for Clorofila-a, brown for Turbidez.
+    # Choose marker color
     if selected_param_col == "chla_mean":
         point_color = "limegreen"
     else:
@@ -113,7 +112,7 @@ with col_left:
         )
     )
 
-    # Ensure y-axis always starts at 0 by setting the range from 0 to a bit above the max value.
+    # Ensure y-axis always starts at 0
     y_max = max(y_vals) if y_vals else 1
     fig.update_layout(
         xaxis_title="Data",
@@ -125,6 +124,7 @@ with col_left:
         width=900,
         title=f"{selected_mass} – {selected_param_label}"
     )
+
     clicked_points = plotly_events(
         fig,
         click_event=True,
@@ -146,30 +146,39 @@ with col_right:
         gid_val = int(row_data["gid"])
         date_str = clicked_date.strftime("%Y%m%d")
 
+        # Build the appropriate file path based on the selected aggregation level
         if selected_agg == "Diário":
+            # "YYYYMMDD_Chla_Diario.png" or "YYYYMMDD_Turb_Diario.png"
             if selected_param_col == "chla_mean":
-                image_name = f"{date_str}_Chla.png"
-                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", image_name)
+                image_name = f"{date_str}_Chla_Diario.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Diário", image_name)
             else:
-                image_name = f"{date_str}_Turb.png"
-                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", image_name)
+                image_name = f"{date_str}_Turb_Diario.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Diário", image_name)
+
         elif selected_agg == "Mensal":
+            # e.g. "2023_02_Média.png"
             month_str = clicked_date.strftime("%Y_%m")
             if selected_param_col == "chla_mean":
                 folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Mensal", "Média")
             else:
                 folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Mensal", "Média")
-            image_name = next((f for f in os.listdir(folder_path) if f.startswith(month_str)), None)
+
+            image_name = None
+            if os.path.exists(folder_path):
+                # find file that starts with YYYY_MM
+                image_name = next((f for f in os.listdir(folder_path) if f.startswith(month_str)), None)
             map_path = os.path.join(folder_path, image_name) if image_name else None
-        elif selected_agg == "Trimestral":
+
+        else:  # Trimestral
+            # e.g. "2023_1° Trimestre_Média.png"
             quarter = (clicked_date.month - 1) // 3 + 1
             quarter_str = f"{clicked_date.year}_{quarter}° Trimestre_Média"
+            image_name = f"{quarter_str}.png"
             if selected_param_col == "chla_mean":
-                image_name = f"{quarter_str}.png"
-                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Trimestral", "Mean", image_name)
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Trimestral", "Média", image_name)
             else:
-                image_name = f"{quarter_str}.png"
-                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Trimestral", "Mean", image_name)
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Trimestral", "Média", image_name)
 
         if map_path and os.path.exists(map_path):
             st.image(map_path, caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", width=600)
