@@ -13,7 +13,18 @@ import pickle
 import plotly.graph_objects as go
 from streamlit_plotly_events import plotly_events
 
-st.set_page_config(layout="centered")
+st.set_page_config(layout="wide")
+
+# CSS snippet to limit the maximum width
+st.markdown("""
+    <style>
+    .main .block-container {
+        max-width: 800px;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
+
 
 @st.cache_data
 def load_data(filepath):
