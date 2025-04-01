@@ -35,7 +35,7 @@ all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
 # Create two columns
-col_left, col_right = st.columns([0.8, 0.9], gap="small")
+col_left, col_right = st.columns([0.8, 1], gap="small")
 
 with col_left:
     # 1) Select Water Mass
@@ -115,8 +115,8 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=40, r=40, t=30, b=10),  # Further reduced margins
-        height=300,  # Further reduced height
+        margin=dict(l=20, r=20, t=20, b=10),  # Reduced margins for a wider graph
+        height=350,  # Increased height for better visibility
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
             y=0.95  # Move title closer to plot
@@ -129,7 +129,7 @@ with col_left:
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=350  # Further reduced
+        override_height=500  # Increased height for better display
     )
 
 with col_right:
@@ -212,13 +212,13 @@ with col_right:
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
 
         if map_path and os.path.exists(map_path):
-            st.markdown('<div style="margin-top: -20px;">', unsafe_allow_html=True)  # Negative margin to pull content up
+            st.markdown('<div style="margin-top: -10px;">', unsafe_allow_html=True)  # Adjusted margin
             st.image(
                 map_path,
                 caption=None,  # Remove caption to save space
-                width=450
+                width=500  # Increased width for a larger map
             )
-            st.markdown(f'<div style="text-align: center; margin-top: -10px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="text-align: center; margin-top: -5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
