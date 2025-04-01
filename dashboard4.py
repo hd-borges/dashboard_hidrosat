@@ -115,8 +115,8 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=20, r=20, t=20, b=10),  # Reduced margins for a wider graph
-        height=350,  # Increased height for better visibility
+        margin=dict(l=50, r=50, t=30, b=40),  # Increased margins to prevent axis cutoff
+        height=350,  # Keep height for better visibility
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
             y=0.95  # Move title closer to plot
@@ -129,7 +129,7 @@ with col_left:
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=500  # Increased height for better display
+        override_height=500  # Keep height for better display
     )
 
 with col_right:
@@ -216,11 +216,11 @@ with col_right:
             st.image(
                 map_path,
                 caption=None,  # Remove caption to save space
-                width=700  # Increased width for a larger map
+                use_container_width=True  # Dynamically fill the available space
             )
             st.markdown(f'<div style="text-align: center; margin-top: -5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
         # Center the message
-        st.markdown("<div style='stext-align: center; margin-top: 20px;'>Clique em um ponto do gráfico para ver o mapa aqui.</div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align: center; margin-top: 20px;'>Clique em um ponto do gráfico para ver o mapa aqui.</div>", unsafe_allow_html=True)
