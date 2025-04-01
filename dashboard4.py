@@ -121,12 +121,12 @@ with col_left:
 
     y_max = max(y_vals) if y_vals else 1
     fig.update_layout(
-        autosize=True,  # or autosize=False if you want to set a fixed height
+        autosize=True,
         xaxis_title="Data",
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=50, r=50, t=120, b=120),  # Increased bottom margin
+        margin=dict(l=50, r=50, t=50, b=50),  # Adjusted margins
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
             x=0.5,
@@ -134,15 +134,20 @@ with col_left:
             xanchor='center'
         ),
         plot_bgcolor='white',
-        showlegend=False
+        showlegend=False,
+        height=400  # Set explicit height
     )
 
+    # Add extra padding in container
+    st.markdown('<div style="margin-bottom: 30px;">', unsafe_allow_html=True)
     clicked_points = plotly_events(
         fig,
         click_event=True,
         hover_event=False,
-        select_event=False
+        select_event=False,
+        override_height=450  # Increased container height
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     st.plotly_chart(fig, use_container_width=True)
 
