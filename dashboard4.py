@@ -115,17 +115,18 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=50, r=80, t=50, b=40),  # Increased right and top margins for menu
+        margin=dict(l=50, r=120, t=50, b=40),  # Increased right margin significantly
         height=350,
-        autosize=True,  # Enable autosize
+        autosize=True,
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
-            y=0.98,  # Move title up slightly
-            x=0.5,   # Center title
+            y=0.98,
+            x=0.5,
             xanchor='center'
         ),
         plot_bgcolor='white',
-        showlegend=False  # Hide legend since we only have one trace
+        showlegend=False,
+        modebar_y=0  # Pin modebar to top
     )
 
     # Adjust plotly_events container size
@@ -138,13 +139,13 @@ with col_left:
     )
 
 with col_right:
-    # Enhanced CSS to reduce spacing
+    # Enhanced CSS to reduce spacing but keep some padding at the top
     st.markdown("""
         <style>
-        .block-container {gap: 0.5rem !important;}
+        .block-container {gap: 1rem !important;}
         .element-container {margin-bottom: 0px !important;}
-        .stImage {margin: 0 !important; padding: 0 !important;}
-        div[data-testid="stImage"] {margin: 0 !important; padding: 0 !important;}
+        .stImage {margin: 15px 0 0 0 !important; padding: 0 !important;}
+        div[data-testid="stImage"] {margin: 15px 0 0 0 !important; padding: 0 !important;}
         </style>
     """, unsafe_allow_html=True)
     
@@ -217,13 +218,13 @@ with col_right:
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
 
         if map_path and os.path.exists(map_path):
-            st.markdown('<div style="margin-top: -10px;">', unsafe_allow_html=True)  # Adjusted margin
+            st.markdown('<div style="margin: 15px 0;">', unsafe_allow_html=True)  # Added top margin
             st.image(
                 map_path,
-                caption=None,  # Remove caption to save space
-                use_container_width=True  # Dynamically fill the available space
+                caption=None,
+                use_container_width=True
             )
-            st.markdown(f'<div style="text-align: center; margin-top: -5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="text-align: center; margin-top: 5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>', unsafe_allow_html=True)
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
