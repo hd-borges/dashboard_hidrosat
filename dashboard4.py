@@ -36,8 +36,8 @@ all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 
 st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
-# Create two columns (make left a bit wider so there's room for the chart)
-col_left, col_right = st.columns([0.8, 1], gap="small")
+# Create two columns with more space for the left column
+col_left, col_right = st.columns([1.2, 0.8], gap="small")
 
 with col_left:
     # 1) Select Water Mass
@@ -126,7 +126,7 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=50, r=50, t=50, b=50),
+        margin=dict(l=40, r=20, t=50, b=50),  # Reduced margins
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
             x=0.5,
@@ -135,10 +135,12 @@ with col_left:
         ),
         plot_bgcolor='white',
         showlegend=False,
-        height=400
+        height=400,
+        width=None  # Let the width be determined by the container
     )
 
-    # Display graph with plotly_events (removed st.plotly_chart)
+    # Use custom container styling and plotly_events
+    st.markdown('<div style="width: 100%;">', unsafe_allow_html=True)
     clicked_points = plotly_events(
         fig,
         click_event=True,
@@ -146,6 +148,7 @@ with col_left:
         select_event=False,
         override_height=450
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col_right:
     # CSS with proper string formatting
