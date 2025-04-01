@@ -48,7 +48,7 @@ all_gdf = load_data(DATA_PATH)
 all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 
 # Create two columns with more space for the left column
-col_left, col_right = st.columns([1, 1], gap="small")")
+col_left, col_right = st.columns([1, 0.9], gap="small")
 
 with col_left:
     # 1) Select Water Mass
