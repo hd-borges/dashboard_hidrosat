@@ -130,14 +130,15 @@ with col_left:
     )
 
 with col_right:
-    # Reduce spacing by combining title and radio into one container
-    with st.container():
-        st.subheader("Mapa Selecionado", divider='gray')
-        selected_agg = st.radio(
-            "Selecione o nível de agregação do mapa:",
-            options=agg_options,
-            horizontal=True,
-        )
+    st.subheader("Mapa Selecionado", divider='gray')
+    
+    # Define options and create radio selector
+    agg_options = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
+    selected_agg = st.radio(
+        "Selecione o nível de agregação do mapa:",
+        options=agg_options,
+        horizontal=True
+    )
 
     if clicked_points:
         point_info = clicked_points[0]
@@ -198,15 +199,14 @@ with col_right:
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
 
         if map_path and os.path.exists(map_path):
-            # Create a container with custom padding and reduced size
-            with st.container():
-                col1, col2, col3 = st.columns([1,8,1])
-                with col2:
-                    st.image(
-                        map_path, 
-                        caption=f"GID: {gid_val}", 
-                        use_container_width=True
-                    )
+            # Adjust map size with columns
+            col1, col2, col3 = st.columns([1,8,1])
+            with col2:
+                st.image(
+                    map_path, 
+                    caption=f"GID: {gid_val}", 
+                    use_container_width=True
+                )
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
