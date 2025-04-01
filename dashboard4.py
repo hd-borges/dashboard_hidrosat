@@ -115,18 +115,18 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=50, r=120, t=50, b=40),  # Increased right margin significantly
+        margin=dict(l=50, r=120, t=80, b=40),  # Increased top margin for modebar
         height=350,
         autosize=True,
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
-            y=0.98,
+            y=0.9,  # Adjusted title position
             x=0.5,
             xanchor='center'
         ),
         plot_bgcolor='white',
         showlegend=False,
-        modebar_y=0  # Pin modebar to top
+        modebar=dict(orientation='v', bgcolor='rgba(0,0,0,0)')  # Vertical orientation, transparent background
     )
 
     # Adjust plotly_events container size
