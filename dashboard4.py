@@ -35,7 +35,7 @@ all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
 # Create two columns
-col_left, col_right = st.columns([0.8, 1], gap="small")
+col_left, col_right = st.columns([0.9, 1], gap="small")
 
 with col_left:
     # 1) Select Water Mass
@@ -134,7 +134,7 @@ with col_left:
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=450
+        override_height=550
     )
 
 with col_right:
