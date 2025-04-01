@@ -161,21 +161,17 @@ with col_right:
         <style>
         .block-container { gap: 1rem !important; }
         .element-container { margin-bottom: 0px !important; }
-        .stImage { margin: 15px 0 0 0 !important; padding: 0 !important; }
-        div[data-testid="stImage"] { margin: 15px 0 0 0 !important; padding: 0 !important; }
+        .stImage { margin: 0 !important; padding: 0 !important; }
+        div[data-testid="stImage"] { margin: 0 !important; padding: 0 !important; }
         .map-container img { max-width: 600px !important; height: auto !important; }
         </style>
     """, unsafe_allow_html=True)
-
-    st.subheader("Mapa Selecionado", divider='gray')
 
     if clicked_points:
         point_info = clicked_points[0]
         point_index = point_info["pointIndex"]
         row_data = filtered_data.iloc[point_index]
         clicked_date = row_data["date_key"]
-
-        st.markdown(f"**Data**: {clicked_date.strftime('%Y-%m-%d')}")
         gid_val = int(row_data["gid"])
         date_str = clicked_date.strftime("%Y%m%d")
 
