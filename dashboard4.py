@@ -132,78 +132,77 @@ with col_left:
 with col_right:
     st.subheader("Mapa Selecionado")
     
-    # Convert radio to horizontal using columns
+    # Replace the radio button with horizontal layout
     agg_options = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
+    st.write("Selecione o nível de agregação do mapa:")
+    selected_agg = None
     cols = st.columns(len(agg_options))
     for i, option in enumerate(agg_options):
         if cols[i].radio("", [option], key=f"agg_{i}", label_visibility="collapsed"):
             selected_agg = option
 
-    # Adjust the layout
-    map_container = st.container()
-    with map_container:
-        if clicked_points:
-            point_info = clicked_points[0]
-            point_index = point_info["pointIndex"]
-            row_data = filtered_data.iloc[point_index]
-            clicked_date = row_data["date_key"]
+    if clicked_points:
+        point_info = clicked_points[0]
+        point_index = point_info["pointIndex"]
+        row_data = filtered_data.iloc[point_index]
+        clicked_date = row_data["date_key"]
 
-            st.write(f"**Data selecionada**: {clicked_date.strftime('%Y-%m-%d')}")
+        st.write(f"**Data selecionada**: {clicked_date.strftime('%Y-%m-%d')}")
 
-            gid_val = int(row_data["gid"])
-            date_str = clicked_date.strftime("%Y%m%d")
+        gid_val = int(row_data["gid"])
+        date_str = clicked_date.strftime("%Y%m%d")
 
-            # Build the appropriate file path based on the selected aggregation level
-            if selected_agg == "Diário":
-                if selected_param_col == "chla_mean":
-                    image_name = f"{date_str}_Chla_Diario.png"
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Diário", image_name)
-                else:
-                    image_name = f"{date_str}_Turb_Diario.png"
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Diário", image_name)
-
-            elif selected_agg == "Mensal":
-                month_str = clicked_date.strftime("%Y_%m")
-                if selected_param_col == "chla_mean":
-                    folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Mensal", "Média")
-                else:
-                    folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Mensal", "Média")
-
-                image_name = None
-                if os.path.exists(folder_path):
-                    image_name = next((f for f in os.listdir(folder_path) if f.startswith(month_str)), None)
-                map_path = os.path.join(folder_path, image_name) if image_name else None
-
-            elif selected_agg == "Trimestral":
-                quarter = (clicked_date.month - 1) // 3 + 1
-                quarter_str = f"{clicked_date.year}_{quarter}°Trimestre_Média"  # Removed space before "Trimestre"
-                image_name = f"{quarter_str}.png"
-                if selected_param_col == "chla_mean":
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Trimestral", "Média", image_name)
-                else:
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Trimestral", "Média", image_name)
-
-            elif selected_agg == "Anual":
-                year_str = clicked_date.strftime("%Y")
-                image_name = f"{year_str}_Média.png"
-                if selected_param_col == "chla_mean":
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Anual", "Média", image_name)
-                else:
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Média", image_name)
-
-            else:  # Permanência
-                year_str = clicked_date.strftime("%Y")
-                image_name = f"{year_str}_Permanência 90%.png"
-                if selected_param_col == "chla_mean":
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Anual", "Permanência_90", image_name)
-                else:
-                    map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
-
-            if map_path and os.path.exists(map_path):
-                st.image(map_path, 
-                         caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", 
-                         use_column_width=True)  # Changed from fixed width to column width
+        # Build the appropriate file path based on the selected aggregation level
+        if selected_agg == "Diário":
+            if selected_param_col == "chla_mean":
+                image_name = f"{date_str}_Chla_Diario.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Diário", image_name)
             else:
-                st.warning(f"Mapa não encontrado: {map_path}")
+                image_name = f"{date_str}_Turb_Diario.png"
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Diário", image_name)
+
+        elif selected_agg == "Mensal":
+            month_str = clicked_date.strftime("%Y_%m")
+            if selected_param_col == "chla_mean":
+                folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Mensal", "Média")
+            else:
+                folder_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Mensal", "Média")
+
+            image_name = None
+            if os.path.exists(folder_path):
+                image_name = next((f for f in os.listdir(folder_path) if f.startswith(month_str)), None)
+            map_path = os.path.join(folder_path, image_name) if image_name else None
+
+        elif selected_agg == "Trimestral":
+            quarter = (clicked_date.month - 1) // 3 + 1
+            quarter_str = f"{clicked_date.year}_{quarter}°Trimestre_Média"  # Remove space before "Trimestre"
+            image_name = f"{quarter_str}.png"
+            if selected_param_col == "chla_mean":
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Trimestral", "Média", image_name)
+            else:
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Trimestral", "Média", image_name)
+
+        elif selected_agg == "Anual":
+            year_str = clicked_date.strftime("%Y")
+            image_name = f"{year_str}_Média.png"
+            if selected_param_col == "chla_mean":
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Anual", "Média", image_name)
+            else:
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Média", image_name)
+
+        else:  # Permanência
+            year_str = clicked_date.strftime("%Y")
+            image_name = f"{year_str}_Permanência 90%.png"
+            if selected_param_col == "chla_mean":
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Anual", "Permanência_90", image_name)
+            else:
+                map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
+
+        if map_path and os.path.exists(map_path):
+            st.image(map_path, 
+                     caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", 
+                     use_column_width=True)  # Use column width instead of fixed width
         else:
-            st.write("Clique em um ponto do gráfico para ver o mapa aqui.")
+            st.warning(f"Mapa não encontrado: {map_path}")
+    else:
+        st.write("Clique em um ponto do gráfico para ver o mapa aqui.")
