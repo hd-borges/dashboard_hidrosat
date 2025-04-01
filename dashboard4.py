@@ -115,8 +115,8 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=40, r=60, t=60, b=40),
-        height=350,
+        margin=dict(l=40, r=60, t=40, b=20),  # Reduced top and bottom margins
+        height=300,  # Reduced from 350
         width=900,
         title=f"{selected_mass} – {selected_param_label}"
     )
@@ -126,10 +126,18 @@ with col_left:
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=600
+        override_height=450  # Reduced from 600
     )
 
 with col_right:
+    # Add custom CSS to reduce spacing
+    st.markdown("""
+        <style>
+        .block-container {gap: 1rem !important;}
+        .element-container {margin: 1px !important;}
+        </style>
+    """, unsafe_allow_html=True)
+    
     st.subheader("Mapa Selecionado", divider='gray')
     
     # Define options and create radio selector
@@ -146,8 +154,8 @@ with col_right:
         row_data = filtered_data.iloc[point_index]
         clicked_date = row_data["date_key"]
 
-        # Compact date display
-        st.write(f"**Data**: {clicked_date.strftime('%Y-%m-%d')}", help="Data selecionada no gráfico")
+        # Combine date display with the subheader
+        st.markdown(f"**Data**: {clicked_date.strftime('%Y-%m-%d')}")
 
         gid_val = int(row_data["gid"])
         date_str = clicked_date.strftime("%Y%m%d")
