@@ -134,8 +134,7 @@ with col_left:
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=550,
-        config={"displayModeBar": True, "responsive": True}
+        override_height=550
     )
 
 with col_right:
