@@ -32,7 +32,7 @@ MAPS_FOLDER = os.path.join(BASE_DIR, "maps")
 all_gdf = load_data(DATA_PATH)
 all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 
-st.title("Visualização de qualidade de Água obtida por dados espaciais.")
+st.title("Visualização de qualidade de Água obtida por dados espaciais")
 
 # Create two columns
 col_left, col_right = st.columns([0.8, 0.9], gap="small")
@@ -78,15 +78,9 @@ with col_left:
         st.warning("Nenhum dado disponível para essa combinação.")
         st.stop()
 
-    # Debug: Print selected parameter information
-    st.write("DEBUG: Selected parameter:", selected_param_label)
-
     # Convert raw data to µg/L for Clorofila-a and NTU for Turbidez
     if selected_param_col == "turb_mean":
-        st.write("DEBUG: Original turbidity sample:", filtered_data[selected_param_col].head())
-        st.write("DEBUG: Original dtype:", filtered_data[selected_param_col].dtype)
         filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
-        st.write("DEBUG: Converted turbidity sample:", filtered_data["value"].head())
         y_axis_title = "NTU"
     else:
         filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
