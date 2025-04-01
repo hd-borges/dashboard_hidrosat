@@ -78,16 +78,19 @@ with col_left:
         st.warning("Nenhum dado disponível para essa combinação.")
         st.stop()
 
+    # Debug: Print selected parameter information
+    st.write("DEBUG: Selected parameter:", selected_param_label)
+
     # Convert raw data to µg/L for Clorofila-a and NTU for Turbidez
-    if selected_param_col == "chla_mean":
+    if selected_param_col == "turb_mean":
+        st.write("DEBUG: Original turbidity sample:", filtered_data[selected_param_col].head())
+        st.write("DEBUG: Original dtype:", filtered_data[selected_param_col].dtype)
+        filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
+        st.write("DEBUG: Converted turbidity sample:", filtered_data["value"].head())
+        y_axis_title = "NTU"
+    else:
         filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
         y_axis_title = "µg/L"
-    else:  # for turb_mean
-        st.write("Original turbidity sample:", filtered_data[selected_param_col].head())
-        st.write("Original dtype:", filtered_data[selected_param_col].dtype)
-        filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
-        y_axis_title = "NTU"
-        st.write("Converted turbidity sample:", filtered_data["value"].head())
 
     # Build Plotly scatter plot
     x_vals = filtered_data["date_key"].tolist()
