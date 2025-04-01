@@ -63,6 +63,14 @@ with col_left:
         format="YYYY-MM-DD"
     )
 
+    # Move aggregation selector here
+    agg_options = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
+    selected_agg = st.radio(
+        "Selecione o nível de agregação do mapa:",
+        options=agg_options,
+        horizontal=True
+    )
+
     # Filter data based on selections
     mask = (
         (all_gdf["nmoriginal"] == selected_mass) &
@@ -141,7 +149,7 @@ with col_left:
     )
 
 with col_right:
-    # CSS to reduce spacing but add a bit of margin for the map
+    # Enhanced CSS to reduce spacing but keep some padding at the top
     st.markdown("""
         <style>
         .block-container {gap: 1rem !important;}
@@ -152,14 +160,6 @@ with col_right:
     """, unsafe_allow_html=True)
     
     st.subheader("Mapa Selecionado", divider='gray')
-    
-    # Define aggregation options
-    agg_options = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
-    selected_agg = st.radio(
-        "Selecione o nível de agregação do mapa:",
-        options=agg_options,
-        horizontal=True
-    )
 
     if clicked_points:
         point_info = clicked_points[0]
