@@ -115,21 +115,26 @@ with col_left:
         yaxis_title=y_axis_title,
         yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
         xaxis=dict(showgrid=True),
-        margin=dict(l=50, r=50, t=30, b=40),  # Increased margins to prevent axis cutoff
-        height=350,  # Keep height for better visibility
+        margin=dict(l=50, r=80, t=50, b=40),  # Increased right and top margins for menu
+        height=350,
+        autosize=True,  # Enable autosize
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
-            y=0.95  # Move title closer to plot
+            y=0.98,  # Move title up slightly
+            x=0.5,   # Center title
+            xanchor='center'
         ),
-        plot_bgcolor='white'
+        plot_bgcolor='white',
+        showlegend=False  # Hide legend since we only have one trace
     )
 
+    # Adjust plotly_events container size
     clicked_points = plotly_events(
         fig,
         click_event=True,
         hover_event=False,
         select_event=False,
-        override_height=500  # Keep height for better display
+        override_height=450
     )
 
 with col_right:
