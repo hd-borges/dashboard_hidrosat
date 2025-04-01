@@ -132,14 +132,15 @@ with col_left:
 with col_right:
     st.subheader("Mapa Selecionado")
     
-    # Replace the radio button with horizontal layout
+    # Replace multiple radios with a single horizontal radio
     agg_options = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
     st.write("Selecione o nível de agregação do mapa:")
-    selected_agg = None
-    cols = st.columns(len(agg_options))
-    for i, option in enumerate(agg_options):
-        if cols[i].radio("", [option], key=f"agg_{i}", label_visibility="collapsed"):
-            selected_agg = option
+    selected_agg = st.radio(
+        label="",
+        options=agg_options,
+        horizontal=True,
+        label_visibility="collapsed"
+    )
 
     if clicked_points:
         point_info = clicked_points[0]
@@ -201,7 +202,7 @@ with col_right:
         if map_path and os.path.exists(map_path):
             st.image(map_path, 
                      caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", 
-                     use_column_width=True)  # Use column width instead of fixed width
+                     use_container_width=True)  # Updated parameter name
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
