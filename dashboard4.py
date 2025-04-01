@@ -147,24 +147,16 @@ with col_left:
     st.plotly_chart(fig, use_container_width=True)
 
 with col_right:
-    # Enhanced CSS to reduce spacing but keep some padding at the top
-    st.markdown(
-        """
+    # CSS with proper string formatting
+    st.markdown("""
         <style>
         .block-container { gap: 1rem !important; }
         .element-container { margin-bottom: 0px !important; }
         .stImage { margin: 15px 0 0 0 !important; padding: 0 !important; }
         div[data-testid="stImage"] { margin: 15px 0 0 0 !important; padding: 0 !important; }
-        
-        /* Limit map images to 600px */
-        .map-container img {
-            max-width: 600px !important; 
-            height: auto !important;
-        }
+        .map-container img { max-width: 600px !important; height: auto !important; }
         </style>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
     st.subheader("Mapa Selecionado", divider='gray')
 
@@ -225,11 +217,11 @@ with col_right:
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
 
         if map_path and os.path.exists(map_path):
-            st.markdown('<div class="map-container" style="margin: 15px 0;">', unsafe_allow_html=True)
+            st.markdown('<div class="map-container">', unsafe_allow_html=True)
             st.image(map_path, caption=None, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown(
-                f'<div style="text-align: center; margin-top: 5px; font-size: 0.8em; color: gray;">GID: {gid_val}</div>',
+                f'<div style="text-align: center; font-size: 0.8em; color: gray;">GID: {gid_val}</div>',
                 unsafe_allow_html=True
             )
         else:
