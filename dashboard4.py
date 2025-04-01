@@ -48,7 +48,7 @@ all_gdf = load_data(DATA_PATH)
 all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
 
 # Create two columns with more space for the left column
-col_left, col_right = st.columns([1, 1], gap="small")
+col_left, col_right = st.columns([1, 1], gap="small")")
 
 with col_left:
     # 1) Select Water Mass
@@ -159,10 +159,11 @@ with col_right:
     # CSS with proper string formatting
     st.markdown("""
         <style>
-        .block-container { gap: 1rem !important; }
-        .element-container { margin-bottom: 0px !important; }
+        .block-container { gap: 0 !important; }
+        .element-container { margin: 0 !important; padding: 0 !important; }
         .stImage { margin: 0 !important; padding: 0 !important; }
         div[data-testid="stImage"] { margin: 0 !important; padding: 0 !important; }
+        .map-container { margin-top: -20px !important; }
         .map-container img { max-width: 600px !important; height: auto !important; }
         </style>
     """, unsafe_allow_html=True)
