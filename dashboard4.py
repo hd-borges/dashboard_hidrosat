@@ -130,17 +130,14 @@ with col_left:
     )
 
 with col_right:
-    st.subheader("Mapa Selecionado")
-    
-    # Replace multiple radios with a single horizontal radio
-    agg_options = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
-    st.write("Selecione o nível de agregação do mapa:")
-    selected_agg = st.radio(
-        label="",
-        options=agg_options,
-        horizontal=True,
-        label_visibility="collapsed"
-    )
+    # Reduce spacing by combining title and radio into one container
+    with st.container():
+        st.subheader("Mapa Selecionado", divider='gray')
+        selected_agg = st.radio(
+            "Selecione o nível de agregação do mapa:",
+            options=agg_options,
+            horizontal=True,
+        )
 
     if clicked_points:
         point_info = clicked_points[0]
@@ -148,7 +145,8 @@ with col_right:
         row_data = filtered_data.iloc[point_index]
         clicked_date = row_data["date_key"]
 
-        st.write(f"**Data selecionada**: {clicked_date.strftime('%Y-%m-%d')}")
+        # Compact date display
+        st.write(f"**Data**: {clicked_date.strftime('%Y-%m-%d')}", help="Data selecionada no gráfico")
 
         gid_val = int(row_data["gid"])
         date_str = clicked_date.strftime("%Y%m%d")
@@ -176,7 +174,7 @@ with col_right:
 
         elif selected_agg == "Trimestral":
             quarter = (clicked_date.month - 1) // 3 + 1
-            quarter_str = f"{clicked_date.year}_{quarter}°Trimestre_Média"  # Remove space before "Trimestre"
+            quarter_str = f"{clicked_date.year}_{quarter}°Trimestre_Média"
             image_name = f"{quarter_str}.png"
             if selected_param_col == "chla_mean":
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Chla", "Trimestral", "Média", image_name)
@@ -200,10 +198,17 @@ with col_right:
                 map_path = os.path.join(MAPS_FOLDER, str(gid_val), "Turbidez", "Anual", "Permanência_90", image_name)
 
         if map_path and os.path.exists(map_path):
-            st.image(map_path, 
-                     caption=f"Mapa para {clicked_date.strftime('%Y-%m-%d')} (GID: {gid_val})", 
-                     use_container_width=True)  # Updated parameter name
+            # Create a container with custom padding and reduced size
+            with st.container():
+                col1, col2, col3 = st.columns([1,8,1])
+                with col2:
+                    st.image(
+                        map_path, 
+                        caption=f"GID: {gid_val}", 
+                        use_container_width=True
+                    )
         else:
             st.warning(f"Mapa não encontrado: {map_path}")
     else:
-        st.write("Clique em um ponto do gráfico para ver o mapa aqui.")
+        # Center the message
+        st.markdown("<div style='text-align: center; margin-top: 20px;'>Clique em um ponto do gráfico para ver o mapa aqui.</div>", unsafe_allow_html=True)
