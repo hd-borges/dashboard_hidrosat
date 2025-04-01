@@ -15,16 +15,6 @@ from streamlit_plotly_events import plotly_events
 
 st.set_page_config(layout="wide")
 
-# CSS snippet to limit the maximum width
-st.markdown("""
-    <style>
-    .main .block-container {
-        max-width: 100px;
-    }
-    </style>
-    """, unsafe_allow_html=True
-)
-
 
 @st.cache_data
 def load_data(filepath):
@@ -139,7 +129,7 @@ with col_left:
         xaxis=dict(showgrid=True),
         
         # Increase top margin so mode bar doesn't overlap the title
-        margin=dict(l=50, r=50, t=120, b=50),
+        margin=dict(l=50, r=50, t=120, b=80),
         
         title=dict(
             text=f"{selected_mass} – {selected_param_label}",
