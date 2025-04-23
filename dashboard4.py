@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Dashboard – water-quality visualisation
+Dashboard – visualização de qualidade da água
 Updated 24 Apr 2025
-  • Rolling mean: true 30-day average based on dates
-  • Mean / Median / Max / Min selector
-  • Low-count pixel filter, map viewer
+  • Rolling mean: 30-day average, smoothed spline line (royal blue)
+  • Legend hidden
+  • Only Média / Mediana options
 """
 
 import os, pickle, numpy as np, pandas as pd
@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 from streamlit_plotly_events import plotly_events
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Styling & title
+# Page config & CSS
 # ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(layout="wide")
 st.markdown("""
@@ -40,18 +40,14 @@ def load_data(fp: str) -> pd.DataFrame:
         return pickle.load(f)
 
 def resolve_stat_col(df: pd.DataFrame, base_param: str, stat: str) -> str:
-    """Return the actual column name present in *df* (media vs median)."""
     pref = "chla" if base_param.startswith("chla") else "turb"
     if   stat == "mean":   cands = [f"{pref}_mean"]
     elif stat == "median": cands = [f"{pref}_media", f"{pref}_median"]
-    elif stat == "max":    cands = [f"{pref}_max"]
-    elif stat == "min":    cands = [f"{pref}_min"]
     elif stat == "count":  cands = [f"{pref}_count"]
     else:                  cands = [f"{pref}_{stat}"]
     return next((c for c in cands if c in df.columns), cands[0])
 
 def values(df: pd.DataFrame, col: str):
-    """Numeric column divided by 100 (undo ×100 scaling)."""
     return (df[col].astype(float) / 100).tolist()
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -80,8 +76,8 @@ with left:
     param_lab  = st.radio("Selecione o parâmetro:", list(param_opts.keys()))
     param_col  = param_opts[param_lab]
 
-    # 3) Estatística
-    stat_opts = {"Média": "mean", "Mediana": "median", "Máximo": "max", "Mínimo": "min"}
+    # 3) Estatística (apenas Média / Mediana)
+    stat_opts = {"Média": "mean", "Mediana": "median"}
     stat_lab  = st.radio("Estatística mostrada no gráfico:", list(stat_opts.keys()), horizontal=True)
     stat_key  = stat_opts[stat_lab]
 
@@ -120,7 +116,7 @@ with left:
     x_vals = df["date_key"].tolist()
     y_vals = values(df, y_col)
 
-    # ─── Média móvel (30 dias) ───────────────────────────────────────────────
+    # ─── Média móvel – 30 dias, spline ───────────────────────────────────────
     show_roll = st.checkbox("Adicionar linha de média móvel (30 dias)", value=False)
     if show_roll:
         s_roll = (
@@ -135,23 +131,29 @@ with left:
     y_title = "NTU" if param_col.startswith("turb") else "µg/L"
 
     fig = go.Figure()
+
+    # Pontos
     fig.add_trace(
         go.Scatter(
             x=x_vals, y=y_vals, mode="markers",
             marker=dict(size=8, color=color, line=dict(width=1, color="black")),
-            name=f"{param_lab} ({stat_lab.lower()})",
+            name="",  # legend off
             hovertemplate=f"<b>Data:</b> %{{x}}<br><b>Valor:</b> %{{y:.2f}} {y_title}<extra></extra>",
+            showlegend=False,
         )
     )
+
+    # Linha média móvel
     if show_roll:
         fig.add_trace(
             go.Scatter(
                 x=x_vals, y=s_roll, mode="lines",
-                line=dict(width=2),
-                name="Média móvel (30 dias)",
+                line=dict(width=3, color="royalblue", shape="spline", smoothing=1.3),
+                name="", showlegend=False,
                 hovertemplate=f"Média móvel: %{{y:.2f}} {y_title}<extra></extra>",
             )
         )
+
     fig.update_layout(
         xaxis_title="Data",
         yaxis_title=y_title,
@@ -159,7 +161,7 @@ with left:
         xaxis=dict(showgrid=True),
         margin=dict(l=40, r=20, t=20, b=50),
         plot_bgcolor="white",
-        showlegend=show_roll,
+        showlegend=False,
         height=400,
     )
 
@@ -169,6 +171,7 @@ with left:
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Right column – mapas
+# (unchanged from previous version)
 # ──────────────────────────────────────────────────────────────────────────────
 with right:
     def build_path(row):
@@ -197,7 +200,6 @@ with right:
         if agg_sel == "Anual":
             return os.path.join(MAPS_FOLDER, str(gid), base, "Anual", "Média", f"{date.year}_Média.png")
 
-        # Permanência 90 %
         return os.path.join(
             MAPS_FOLDER, str(gid), base, "Anual", "Permanência_90",
             f"{date.year}_Permanência 90%.png"
