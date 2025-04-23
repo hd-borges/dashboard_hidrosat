@@ -1,287 +1,194 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar 17 14:44:28 2025
-@author: henrique
-
-Improved to include:
- - Min / Median / Max metrics
- - Suppress low-pixel-count points
- - Optional rolling-mean line
+Dashboard – water-quality visualisation
+Updated 23 Apr 2025  (stat selector: mean / median / max / min)
 """
-import os
-import datetime
+
+import os, numpy as np, pickle
 import streamlit as st
 import pandas as pd
-import pickle
 import plotly.graph_objects as go
 from streamlit_plotly_events import plotly_events
 
-# Set a wide page layout
+# ──────────────────────────────────────────────────────────────────────────────
+# Style
+# ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(layout="wide")
-
-# Custom CSS for smaller title
 st.markdown("""
-    <style>
-    .smaller-title {
-        font-size: 28px !important;
-        font-weight: bold !important;
-        margin-bottom: 0px !important;
-    }
-    </style>
+<style>
+.smaller-title {font-size:28px!important;font-weight:bold!important}
+.block-container{gap:0!important}.element-container,.stImage{margin:0!important;padding:0!important}
+div[data-testid="stImage"]{margin:0!important;padding:0!important}
+.map-container{margin-top:-20px!important}.map-container img{max-width:600px!important;height:auto!important}
+</style>
 """, unsafe_allow_html=True)
-
-# Header
 st.markdown(
-    '<p class="smaller-title">Visualização de Qualidade de Água obtida por dados espaciais</p>',
-    unsafe_allow_html=True
+    '<p class="smaller-title">Visualização de qualidade de Água obtida por dados espaciais</p>',
+    unsafe_allow_html=True,
 )
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ──────────────────────────────────────────────────────────────────────────────
 @st.cache_data
-def load_data(filepath):
-    """Load data from a pickle file."""
-    with open(filepath, "rb") as f:
+def load_data(fp):           # type: (str) -> pd.DataFrame
+    with open(fp, "rb") as f:
         return pickle.load(f)
 
-# -------------------------------------------------------------------
-# Paths
-# -------------------------------------------------------------------
-BASE_DIR    = os.path.dirname(__file__)
-DATA_PATH   = os.path.join(BASE_DIR, "all_water_masses.pkl")
-MAPS_FOLDER = os.path.join(BASE_DIR, "maps")
+def stat_col(base, stat):    # chla_mean -> chla_median, ...
+    prefix = "chla" if base.startswith("chla") else "turb"
+    return f"{prefix}_{stat}"
 
-# Load and prepare
-all_gdf = load_data(DATA_PATH)
-all_gdf["date_key"] = pd.to_datetime(all_gdf["date_key"], errors="coerce")
+def series(df, col):         # divide by 100 to restore units
+    return (df[col].astype(float) / 100).tolist()
 
-# Two-column layout
-col_left, col_right = st.columns([1, 0.9], gap="small")
+# ──────────────────────────────────────────────────────────────────────────────
+# Paths & data
+# ──────────────────────────────────────────────────────────────────────────────
+DIR = os.path.dirname(__file__)
+DATA_PATH   = os.path.join(DIR, "all_water_masses.pkl")
+MAPS_FOLDER = os.path.join(DIR, "maps")
 
-with col_left:
-    # 1) Water mass selector
-    mass_list    = sorted(all_gdf["nmoriginal"].dropna().unique())
-    default_mass = "Açude Castanhão" if "Açude Castanhão" in mass_list else mass_list[0]
-    selected_mass = st.selectbox(
-        "Selecione a massa d'água:",
-        mass_list,
-        index=mass_list.index(default_mass)
-    )
+gdf = load_data(DATA_PATH)
+gdf["date_key"] = pd.to_datetime(gdf["date_key"], errors="coerce")
 
-    # 2) Parameter selector
-    param_options       = {
-        "Clorofila-a (Média)": "chla_mean",
-        "Turbidez (Média)"   : "turb_mean",
-    }
-    selected_param_label = st.radio(
-        "Selecione o parâmetro:",
-        list(param_options.keys())
-    )
-    selected_param_col   = param_options[selected_param_label]
+# ──────────────────────────────────────────────────────────────────────────────
+# UI – left
+# ──────────────────────────────────────────────────────────────────────────────
+left, right = st.columns([1, .9], gap="small")
 
-    # 3) Date range
-    min_date = all_gdf["date_key"].min().date()
-    max_date = all_gdf["date_key"].max().date()
-    date_range = st.slider(
-        "Selecione o intervalo de datas:",
-        min_value=min_date,
-        max_value=max_date,
-        value=(min_date, max_date),
-        format="YYYY-MM-DD"
-    )
+with left:
+    # water-mass
+    masses     = sorted(gdf["nmoriginal"].dropna().unique())
+    default    = "Açude Castanhão" if "Açude Castanhão" in masses else masses[0]
+    sel_mass   = st.selectbox("Selecione a massa d'água:", masses, index=masses.index(default))
 
-    # 4) Aggregation level (for maps)
-    agg_options  = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
-    selected_agg = st.radio(
-        "Selecione o nível de agregação do mapa:",
-        options=agg_options,
-        horizontal=True
-    )
+    # parameter (mean-based folders for maps)
+    param_opts = {"Clorofila-a": "chla_mean", "Turbidez": "turb_mean"}
+    param_lab  = st.radio("Selecione o parâmetro:", list(param_opts.keys()))
+    param_col  = param_opts[param_lab]
 
-    # 5) Filter core data
+    # statistic for chart
+    stat_opts  = {"Média": "mean", "Mediana": "median", "Máximo": "max", "Mínimo": "min"}
+    sel_stat   = st.radio("Estatística mostrada no gráfico:", list(stat_opts.keys()), horizontal=True)
+    stat_col_name = stat_col(param_col, stat_opts[sel_stat])
+
+    # date range
+    dmin, dmax = gdf["date_key"].min().date(), gdf["date_key"].max().date()
+    d_range = st.slider("Selecione o intervalo de datas:", dmin, dmax, (dmin, dmax), format="YYYY-MM-DD")
+
+    # aggregation (map level)
+    agg_opts = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
+    agg_sel  = st.radio("Selecione o nível de agregação do mapa:", agg_opts, horizontal=True)
+
+    # filter dataframe
     mask = (
-        (all_gdf["nmoriginal"] == selected_mass) &
-        (all_gdf["date_key"].dt.date >= date_range[0]) &
-        (all_gdf["date_key"].dt.date <= date_range[1])
+        (gdf["nmoriginal"] == sel_mass)
+        & (gdf["date_key"].dt.date >= d_range[0])
+        & (gdf["date_key"].dt.date <= d_range[1])
     )
-    filtered_data = all_gdf[mask].copy()
-    filtered_data = filtered_data[filtered_data[selected_param_col] > 0]
-    filtered_data.sort_values("date_key", inplace=True)
-    filtered_data.reset_index(drop=True, inplace=True)
+    df = gdf.loc[mask].copy()
+    df = df[df[param_col] > 0]
 
-    if filtered_data.empty:
+    # low-count filter
+    cnt_col = stat_col(param_col, "count")
+    if cnt_col in df.columns:
+        use_filter = st.checkbox("Filtrar pontos com baixa contagem de pixels", value=False)
+        if use_filter:
+            thresh = max(5, df[cnt_col].quantile(.25))
+            df = df[df[cnt_col] >= thresh]
+            st.caption(f"Pontos com contagem &lt; **{int(thresh)}** pixels removidos.")
+
+    if df.empty:
         st.warning("Nenhum dado disponível para essa combinação.")
         st.stop()
 
-    # 6) Suppress low-count points
-    #    count_col comes from the raw stats in the pkl
-    count_col = "chla_count" if selected_param_col == "chla_mean" else "turb_count"
-    suppress = st.checkbox("Suppress low-count points based on pixel count")
-    if suppress:
-        default_thr = int(filtered_data[count_col].quantile(0.25))
-        thr = st.slider(
-            "Minimum pixel-count threshold:",
-            min_value=int(filtered_data[count_col].min()),
-            max_value=int(filtered_data[count_col].max()),
-            value=default_thr
-        )
-        filtered_data = filtered_data[filtered_data[count_col] >= thr]
-        if filtered_data.empty:
-            st.warning("Nenhum dado disponível após aplicar o filtro de contagem de pixels.")
-            st.stop()
+    df.sort_values("date_key", inplace=True, ignore_index=True)
 
-    # 7) Convert to display units
-    if selected_param_col == "turb_mean":
-        filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
-        y_axis_title = "NTU"
-    else:
-        filtered_data["value"] = filtered_data[selected_param_col].astype(float) / 100
-        y_axis_title = "µg/L"
+    # y-series
+    x_vals = df["date_key"].tolist()
+    y_vals = series(df, stat_col_name)
 
-    # 8) Summary metrics
-    stats = filtered_data["value"].astype(float)
-    min_val    = stats.min()
-    median_val = stats.median()
-    max_val    = stats.max()
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Min",    f"{min_val:.2f} {y_axis_title}")
-    m2.metric("Median", f"{median_val:.2f} {y_axis_title}")
-    m3.metric("Max",    f"{max_val:.2f} {y_axis_title}")
+    # rolling mean
+    show_roll = st.checkbox("Adicionar linha de média móvel", value=False)
+    if show_roll:
+        win = st.slider("Janela da média móvel (pontos):", 2, 30, 5, key="roll_win")
+        roll_vals = pd.Series(y_vals).rolling(win, center=True, min_periods=1).mean()
 
-    # 9) Build Plotly figure
-    x_vals = filtered_data["date_key"].tolist()
-    y_vals = filtered_data["value"].tolist()
-    point_color = "limegreen" if selected_param_col == "chla_mean" else "brown"
+    # plot
+    color = "limegreen" if param_col.startswith("chla") else "brown"
+    y_title = "NTU" if param_col.startswith("turb") else "µg/L"
 
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
-            x=x_vals,
-            y=y_vals,
-            mode="markers",
-            marker=dict(size=8, color=point_color, line=dict(width=1, color="black")),
-            name=selected_param_label,
-            hovertemplate=(
-                "<b>Data:</b> %{x}<br>"
-                "<b>Valor:</b> %{y:.2f} " + y_axis_title + "<extra></extra>"
-            )
+            x=x_vals, y=y_vals, mode="markers",
+            marker=dict(size=8, color=color, line=dict(width=1, color="black")),
+            name=f"{param_lab} ({sel_stat.lower()})",
+            hovertemplate=f"<b>Data:</b> %{{x}}<br><b>Valor:</b> %{{y:.2f}} {y_title}<extra></extra>",
         )
     )
-
-    # 10) Optional rolling mean
-    rolling = st.checkbox("Show rolling mean line")
-    if rolling:
-        # window in days
-        window_days = st.slider("Rolling mean window (days):", 1, 365, 30)
-        # compute time-based rolling mean
-        rm = (
-            filtered_data
-            .set_index("date_key")["value"]
-            .rolling(f"{window_days}D")
-            .mean()
-            .dropna()
-        )
+    if show_roll:
         fig.add_trace(
             go.Scatter(
-                x=rm.index,
-                y=rm.values,
-                mode="lines",
-                name=f"{window_days}-day rolling mean",
-                line=dict(width=2)
+                x=x_vals, y=roll_vals, mode="lines",
+                line=dict(width=2), name=f"Média móvel ({win})",
+                hovertemplate=f"Média móvel: %{{y:.2f}} {y_title}<extra></extra>",
             )
         )
-        show_legend = True
-    else:
-        show_legend = False
-
-    # 11) Layout tweaks
-    y_max = max(y_vals) if y_vals else 1
     fig.update_layout(
-        autosize=True,
-        xaxis_title="Data",
-        yaxis_title=y_axis_title,
-        yaxis=dict(range=[0, y_max * 1.1], showgrid=True),
+        xaxis_title="Data", yaxis_title=y_title,
+        yaxis=dict(range=[0, max(y_vals)*1.1], showgrid=True),
         xaxis=dict(showgrid=True),
         margin=dict(l=40, r=20, t=20, b=50),
         plot_bgcolor="white",
-        showlegend=show_legend,
+        showlegend=show_roll,
         height=400,
-        width=None
     )
 
-    # 12) Render chart & capture clicks
-    st.markdown("<div style='width:100%'>", unsafe_allow_html=True)
-    clicked_points = plotly_events(
-        fig,
-        click_event=True,
-        hover_event=False,
-        select_event=False,
-        override_height=450
-    )
+    st.markdown('<div style="width:100%;">', unsafe_allow_html=True)
+    click = plotly_events(fig, click_event=True, hover_event=False, select_event=False, override_height=450)
     st.markdown("</div>", unsafe_allow_html=True)
 
-with col_right:
-    # Map CSS tweaks
-    st.markdown("""
-        <style>
-        .block-container { gap: 0 !important; }
-        .element-container { margin: 0 !important; padding: 0 !important; }
-        .stImage { margin: 0 !important; padding: 0 !important; }
-        div[data-testid="stImage"] { margin: 0 !important; padding: 0 !important; }
-        .map-container { margin-top: -20px !important; }
-        .map-container img { max-width: 600px !important; height: auto !important; }
-        </style>
-    """, unsafe_allow_html=True)
-
-    if clicked_points:
-        pt   = clicked_points[0]
-        idx  = pt["pointIndex"]
-        row  = filtered_data.iloc[idx]
-        date = row["date_key"]
-        gid  = int(row["gid"])
-        ds   = date.strftime("%Y%m%d")
-
-        # Build map path as before...
-        if selected_agg == "Diário":
-            img_name = f"{ds}_{'Chla' if selected_param_col=='chla_mean' else 'Turb'}_Diario.png"
-            folder   = "Chla" if selected_param_col=="chla_mean" else "Turbidez"
-            map_path = os.path.join(MAPS_FOLDER, str(gid), folder, "Diário", img_name)
-
-        elif selected_agg == "Mensal":
-            mon     = date.strftime("%Y_%m")
-            base    = "Chla" if selected_param_col=="chla_mean" else "Turbidez"
-            folder  = os.path.join(MAPS_FOLDER, str(gid), base, "Mensal", "Média")
-            img_name = next((f for f in os.listdir(folder) if f.startswith(mon)), None)
-            map_path = os.path.join(folder, img_name) if img_name else None
-
-        elif selected_agg == "Trimestral":
-            q = (date.month - 1) // 3 + 1
+# ──────────────────────────────────────────────────────────────────────────────
+# UI – right (maps)
+# ──────────────────────────────────────────────────────────────────────────────
+with right:
+    def map_path(row):
+        gid = int(row["gid"]); date = row["date_key"]; dstr = date.strftime("%Y%m%d")
+        base = "Chla" if param_col.startswith("chla") else "Turbidez"
+        if agg_sel == "Diário":
+            name = f"{dstr}_{'Chla' if base=='Chla' else 'Turb'}_Diario.png"
+            return os.path.join(MAPS_FOLDER, str(gid), base, "Diário", name)
+        if agg_sel == "Mensal":
+            p = os.path.join(MAPS_FOLDER, str(gid), base, "Mensal", "Média")
+            mstr = date.strftime("%Y_%m")
+            try:
+                return os.path.join(p, next(f for f in os.listdir(p) if f.startswith(mstr)))
+            except StopIteration:
+                return None
+        if agg_sel == "Trimestral":
+            q = (date.month-1)//3 + 1
             name = f"{date.year}_{q}°Trimestre_Média.png"
-            base = "Chla" if selected_param_col=="chla_mean" else "Turbidez"
-            map_path = os.path.join(MAPS_FOLDER, str(gid), base, "Trimestral", "Média", name)
+            return os.path.join(MAPS_FOLDER, str(gid), base, "Trimestral", "Média", name)
+        if agg_sel == "Anual":
+            return os.path.join(MAPS_FOLDER, str(gid), base, "Anual", "Média", f"{date.year}_Média.png")
+        # Permanência
+        return os.path.join(MAPS_FOLDER, str(gid), base, "Anual", "Permanência_90", f"{date.year}_Permanência 90%.png")
 
-        elif selected_agg == "Anual":
-            name = f"{date.year}_Média.png"
-            base = "Chla" if selected_param_col=="chla_mean" else "Turbidez"
-            map_path = os.path.join(MAPS_FOLDER, str(gid), base, "Anual", "Média", name)
-
-        else:  # Permanência
-            name = f"{date.year}_Permanência 90%.png"
-            base = "Chla" if selected_param_col=="chla_mean" else "Turbidez"
-            map_path = os.path.join(MAPS_FOLDER, str(gid), base, "Anual", "Permanência_90", name)
-
-        if map_path and os.path.exists(map_path):
+    if click and click[0]["curveNumber"] == 0:    # only marker trace
+        idx = click[0]["pointIndex"]; row = df.iloc[idx]
+        path = map_path(row)
+        if path and os.path.exists(path):
             st.markdown('<div class="map-container">', unsafe_allow_html=True)
-            st.image(map_path, use_container_width=True)
+            st.image(path, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown(
-                f'<div style="text-align:center;font-size:0.8em;color:gray;">GID: {gid}</div>',
-                unsafe_allow_html=True
-            )
+            st.markdown(f"<div style='text-align:center;font-size:0.8em;color:gray;'>GID: {int(row['gid'])}</div>",
+                        unsafe_allow_html=True)
         else:
-            st.warning(f"Mapa não encontrado: {map_path}")
+            st.warning(f"Mapa não encontrado: {path}")
     else:
         st.markdown(
-            "<div style='text-align:center;margin-top:20px;'>"
-            "Clique em um ponto do gráfico para ver o mapa aqui."
-            "</div>",
-            unsafe_allow_html=True
+            "<div style='text-align:center;margin-top:20px;'>Clique em um ponto do gráfico para ver o mapa aqui.</div>",
+            unsafe_allow_html=True,
         )
