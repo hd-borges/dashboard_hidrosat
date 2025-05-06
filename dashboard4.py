@@ -86,7 +86,7 @@ with left:
     d_range = st.slider("Selecione o intervalo de datas:", dmin, dmax, (dmin, dmax), format="YYYY-MM-DD")
 
     # 5) Nível de agregação (mapas)
-    agg_opts = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência"]
+    agg_opts = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência", "Estado Trófico"]
     agg_sel  = st.radio("Selecione o nível de agregação do mapa:", agg_opts, horizontal=True)
 
     # ─── Filtra dados ─────────────────────────────────────────────────────────
@@ -171,7 +171,7 @@ with left:
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Right column – mapas
-# (unchanged from previous version)
+# (unchanged except for novo Estado Trófico)
 # ──────────────────────────────────────────────────────────────────────────────
 with right:
     def build_path(row):
@@ -200,6 +200,15 @@ with right:
         if agg_sel == "Anual":
             return os.path.join(MAPS_FOLDER, str(gid), base, "Anual", "Média", f"{date.year}_Média.png")
 
+        if agg_sel == "Estado Trófico":
+            # Disponível apenas para Chla – período fixo 2018-2024
+            if not param_col.startswith("chla"):
+                return None
+            return os.path.join(
+                MAPS_FOLDER, str(gid), "Chla", "2018_2024", "Permanência_90", "2018_2024_IET90.png"
+            )
+
+        # Permanência (90 %)
         return os.path.join(
             MAPS_FOLDER, str(gid), base, "Anual", "Permanência_90",
             f"{date.year}_Permanência 90%.png"
