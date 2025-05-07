@@ -2,7 +2,8 @@
 """
 Dashboard – visualização de qualidade da água
 Updated 07 May 2025
-  • Agregações em duas linhas mais compactas (4 + 3) e alinhamento lateral
+  • Rádio “Nível de agregação” em grade 4 × 2 (4 itens na 1ª linha, 3 na 2ª)
+  • Layout mais compacto, alinhamento lateral do botão e texto
 """
 
 import os, pickle, numpy as np, pandas as pd
@@ -14,39 +15,42 @@ from streamlit_plotly_events import plotly_events
 # Page config & CSS
 # ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(layout="wide")
-st.markdown("""
+st.markdown(
+    """
 <style>
-.smaller-title{font-size:28px!important;font-weight:bold!important}
+/* ——— Título ——— */
+.smaller-title{
+    font-size:28px!important;
+    font-weight:bold!important;
+}
+
+/* ——— Ajustes gerais ——— */
 .block-container{gap:0!important}
 .element-container,.stImage{margin:0!important;padding:0!important}
 div[data-testid="stImage"]{margin:0!important;padding:0!important}
 .map-container{margin-top:-20px!important}
 .map-container img{max-width:600px!important;height:auto!important}
 
-/* === Rádio “Nível de agregação” ========================================== */
-div[data-testid="stRadio"] div[role="radiogroup"]{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px 24px;        /* linha, coluna */
-}
+/* ——— Todos os grupos de rádio ——— */
 div[data-testid="stRadio"] label{
-    display:flex;
-    align-items:center;   /* círculo alinhado ao texto */
+    display:flex;              /* ícone + texto lado a lado */
+    align-items:center;
     gap:4px;
     white-space:nowrap;
     font-size:14px;
-    margin-bottom:4px;    /* reduz espaçamento vertical */
 }
-/* Garante 4 itens na 1ª linha (largura máxima ≈ 22 %) */
-div[data-testid="stRadio"] label:nth-of-type(-n+4){
-    flex:0 1 22%;
-}
-/* Restante ocupa ~30 % (3 por linha)                                    */
-div[data-testid="stRadio"] label:nth-of-type(n+5){
-    flex:0 1 30%;
+
+/* ——— Grade 4 × N para que o 1º grupo tenha 4 itens/linha ——— */
+div[data-testid="stRadio"] div[role="radiogroup"]{
+    display:grid;
+    grid-template-columns:repeat(4,max-content); /* 4 colunas fixas */
+    column-gap:24px;
+    row-gap:4px;
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 st.markdown(
     '<p class="smaller-title">Visualização de qualidade de Água obtida por dados espaciais</p>',
     unsafe_allow_html=True,
