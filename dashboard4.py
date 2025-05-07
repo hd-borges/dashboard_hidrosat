@@ -2,7 +2,7 @@
 """
 Dashboard – visualização de qualidade da água
 Updated 07 May 2025
-  • Layout de agregações em duas linhas (4 + 3 opções)
+  • Agregações em duas linhas mais compactas (4 + 3) e alinhamento lateral
 """
 
 import os, pickle, numpy as np, pandas as pd
@@ -23,12 +23,27 @@ div[data-testid="stImage"]{margin:0!important;padding:0!important}
 .map-container{margin-top:-20px!important}
 .map-container img{max-width:600px!important;height:auto!important}
 
-/* Rádio “Nível de agregação” – 4 opções na 1ª linha, 3 na 2ª */
+/* === Rádio “Nível de agregação” ========================================== */
+div[data-testid="stRadio"] div[role="radiogroup"]{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 24px;        /* linha, coluna */
+}
 div[data-testid="stRadio"] label{
-    display:inline-block;
-    width:24%;           /* 4 itens ≈ 100 % */
+    display:flex;
+    align-items:center;   /* círculo alinhado ao texto */
+    gap:4px;
     white-space:nowrap;
-    margin-bottom:4px;   /* pequeno espaçamento vertical */
+    font-size:14px;
+    margin-bottom:4px;    /* reduz espaçamento vertical */
+}
+/* Garante 4 itens na 1ª linha (largura máxima ≈ 22 %) */
+div[data-testid="stRadio"] label:nth-of-type(-n+4){
+    flex:0 1 22%;
+}
+/* Restante ocupa ~30 % (3 por linha)                                    */
+div[data-testid="stRadio"] label:nth-of-type(n+5){
+    flex:0 1 30%;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -82,7 +97,7 @@ with left:
     param_lab  = st.radio("Selecione o parâmetro:", list(param_opts.keys()))
     param_col  = param_opts[param_lab]
 
-    # 3) Estatística (apenas Média / Mediana)
+    # 3) Estatística
     stat_opts = {"Média": "mean", "Mediana": "median"}
     stat_lab  = st.radio("Estatística mostrada no gráfico:", list(stat_opts.keys()), horizontal=True)
     stat_key  = stat_opts[stat_lab]
@@ -125,7 +140,7 @@ with left:
     x_vals = df["date_key"].tolist()
     y_vals = values(df, y_col)
 
-    # ─── Média móvel – 30 dias, spline ───────────────────────────────────────
+    # ─── Média móvel – 30 dias ───────────────────────────────────────────────
     show_roll = st.checkbox("Adicionar linha de média móvel (30 dias)", value=False)
     if show_roll:
         s_roll = (
