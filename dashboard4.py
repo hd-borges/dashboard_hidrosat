@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Dashboard – visualização de qualidade da água
-Updated 24 Apr 2025
-  • Rolling mean: 30-day average, smoothed spline line (royal blue)
-  • Legend hidden
-  • Only Média / Mediana options
+Updated 07 May 2025
+  • Novo mapa “Estado Trófico Mensal”
+  • Rádio de agregação exibe opções em duas linhas
 """
 
 import os, pickle, numpy as np, pandas as pd
@@ -24,6 +23,9 @@ st.markdown("""
 div[data-testid="stImage"]{margin:0!important;padding:0!important}
 .map-container{margin-top:-20px!important}
 .map-container img{max-width:600px!important;height:auto!important}
+
+/* Radio em duas linhas (aprox. 50 % de largura cada) */
+div[data-testid="stRadio"] label{display:inline-block;width:48%;white-space:nowrap}
 </style>
 """, unsafe_allow_html=True)
 st.markdown(
@@ -86,7 +88,10 @@ with left:
     d_range = st.slider("Selecione o intervalo de datas:", dmin, dmax, (dmin, dmax), format="YYYY-MM-DD")
 
     # 5) Nível de agregação (mapas)
-    agg_opts = ["Diário", "Mensal", "Trimestral", "Anual", "Permanência", "Estado Trófico"]
+    agg_opts = [
+        "Diário", "Mensal", "Trimestral", "Anual",
+        "Permanência", "Estado Trófico", "Estado Trófico Mensal"
+    ]
     agg_sel  = st.radio("Selecione o nível de agregação do mapa:", agg_opts, horizontal=True)
 
     # ─── Filtra dados ─────────────────────────────────────────────────────────
@@ -137,9 +142,8 @@ with left:
         go.Scatter(
             x=x_vals, y=y_vals, mode="markers",
             marker=dict(size=8, color=color, line=dict(width=1, color="black")),
-            name="",  # legend off
+            name="", showlegend=False,
             hovertemplate=f"<b>Data:</b> %{{x}}<br><b>Valor:</b> %{{y:.2f}} {y_title}<extra></extra>",
-            showlegend=False,
         )
     )
 
@@ -171,7 +175,6 @@ with left:
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Right column – mapas
-# (unchanged except for novo Estado Trófico)
 # ──────────────────────────────────────────────────────────────────────────────
 with right:
     def build_path(row):
@@ -192,6 +195,14 @@ with right:
             except StopIteration:
                 return None
 
+        if agg_sel == "Estado Trófico Mensal":
+            if not param_col.startswith("chla"):
+                return None
+            month = date.strftime("%Y_%m")
+            return os.path.join(
+                MAPS_FOLDER, str(gid), "Chla", "Mensal", "Média", "IET", f"{month}_IET.png"
+            )
+
         if agg_sel == "Trimestral":
             q = (date.month - 1)//3 + 1
             name = f"{date.year}_{q}°Trimestre_Média.png"
@@ -201,7 +212,6 @@ with right:
             return os.path.join(MAPS_FOLDER, str(gid), base, "Anual", "Média", f"{date.year}_Média.png")
 
         if agg_sel == "Estado Trófico":
-            # Disponível apenas para Chla – período fixo 2018-2024
             if not param_col.startswith("chla"):
                 return None
             return os.path.join(
