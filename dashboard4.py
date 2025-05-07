@@ -2,8 +2,7 @@
 """
 Dashboard – visualização de qualidade da água
 Updated 07 May 2025
-  • Novo mapa “Estado Trófico Mensal”
-  • Rádio de agregação exibe opções em duas linhas
+  • Layout de agregações em duas linhas (4 + 3 opções)
 """
 
 import os, pickle, numpy as np, pandas as pd
@@ -24,8 +23,13 @@ div[data-testid="stImage"]{margin:0!important;padding:0!important}
 .map-container{margin-top:-20px!important}
 .map-container img{max-width:600px!important;height:auto!important}
 
-/* Radio em duas linhas (aprox. 50 % de largura cada) */
-div[data-testid="stRadio"] label{display:inline-block;width:48%;white-space:nowrap}
+/* Rádio “Nível de agregação” – 4 opções na 1ª linha, 3 na 2ª */
+div[data-testid="stRadio"] label{
+    display:inline-block;
+    width:24%;           /* 4 itens ≈ 100 % */
+    white-space:nowrap;
+    margin-bottom:4px;   /* pequeno espaçamento vertical */
+}
 </style>
 """, unsafe_allow_html=True)
 st.markdown(
